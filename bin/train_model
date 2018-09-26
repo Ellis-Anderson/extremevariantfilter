@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
 Usage:
-    train_model.py (--true-pos STR) (--false-pos STR) (--type STR) [--out STR] [--njobs INT] [--verbose]
+    train_model (--true-pos STR) (--false-pos STR) (--type STR) [--out STR] [--njobs INT] [--verbose]
 
 Description:
-    Train a model to be saved and used with VCFs.
+    Train a model to be saved and used to filter VCFs.
 
 Arguments:
     --true-pos STR          Path to true-positive VCF from VCFeval or comma-seperated list of paths
@@ -19,16 +19,36 @@ Options:
     --verbose                       Log output
 
 Examples:
-    python train_table.py --true-pos <path/to/tp/vcf> --false-pos <path/to/fp/vcf> --type [SNP, INDEL] --njobs 20
+    python train_table.py --true-pos <path/to/tp/vcf(s)> --false-pos <path/to/fp/vcf(s)> --type [SNP, INDEL] --njobs 20
 """
 
+from docopt import docopt
 import extremevariantfilter as evf
 from multiprocessing import Pool
 from contextlib import closing
+import pandas as pd
+import numpy as np
+import pickle
 import warnings
 
 
 def get_options():
+    """Gets command line arguments
+
+    Returns
+    -------
+    tp_vcf : str
+        path to true positive vcf
+    fp_vcf : str
+        path to false positive vcf
+    poly : str
+        type of polymorphism. 'SNP' or 'INDEL'
+    njobs : int
+        number of threads used for exdecution
+    outname : str
+        name for the output model
+    """
+
     args = docopt(__doc__, version='1.0')
     verbose = args['--verbose']
 
@@ -46,6 +66,12 @@ def get_options():
 
 
 def main():
+    """Main function for train_model
+
+    Trains an XGBClassifier based on command line arguments.
+    This model is then pickled and stored for future use.
+    """
+
     warnings.filterwarnings('ignore',category=DeprecationWarning)
 
     tp_vcf, fp_vcf, poly, njobs, outname = get_options()
