@@ -421,3 +421,26 @@ def Build_Model(poly, njobs):
                  nthread=njobs))
 
     return model
+
+
+def Check_VCF_Paths(tp_vcf_path, fp_vcf_path):
+    """Checks to make sure there are equal numbers of tp and fp vcfs
+
+    Parameters
+    ----------
+    tp_vcf_path : str
+        comma seperated list of TP vcf paths
+    fp_vcf_path : str
+        comma seperated list of FP vcf paths
+
+    Returns
+    -------
+    list
+        a list of tuples containing paired vcf paths
+    """
+
+    if "," in tp_vcf_path or "," in fp_vcf_path:
+        if len(tp_vcf_path.split(",")) != len(fp_vcf_path.split(",")):
+            raise ValueError('Unequal number of True and False VCFs supplied')
+
+    return zip(tp_vcf_path.split(","), fp_vcf_path.split(","))
