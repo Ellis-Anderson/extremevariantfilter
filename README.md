@@ -50,6 +50,6 @@ __train_model__
 
 ### Install
 
-To install and run EVF simply type:
+To install EVF simply type:
 
     pip install extremevariantfilter
