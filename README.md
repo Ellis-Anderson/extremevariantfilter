@@ -23,7 +23,7 @@ __apply_filter__
         --verbose                       Log output
 
     Examples:
-        python apply_filter.py --vcf <table> --snp-model <snp.pickle.dat> --indel-model <indel.pickle.dat>
+        apply_filter --vcf <table> --snp-model <snp.pickle.dat> --indel-model <indel.pickle.dat>
 
 __train_model__
 
@@ -46,4 +46,10 @@ __train_model__
         --verbose                       Log output
 
     Examples:
-        python train_table.py --true-pos <path/to/tp/vcf(s)> --false-pos <path/to/fp/vcf(s)> --type [SNP, INDEL] --njobs 20
+        train_table --true-pos <path/to/tp/vcf(s)> --false-pos <path/to/fp/vcf(s)> --type [SNP, INDEL] --njobs 20
+
+### Install
+
+To install and run EVF simply type:
+
+    pip install extremevariantfilter

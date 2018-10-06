@@ -5,12 +5,12 @@ def readme():
 		return f.read()
 
 setup(name='extremevariantfilter',
-      version='0.1',
+      version='0.0.a1',
       description='A set of tools to aid in the identification of false positive variants in Variant Call Files.',
       long_description=readme(),
       long_description_content_type="text/markdown",
       classifiers=[
-         'Development Status :: 2 - Pre-Alpha',
+         'Development Status :: 3 - Alpha',
          'Programming Language :: Python :: 2.7',
          'Intended Audience :: Science/Research',
          'Topic :: Scientific/Engineering :: Bio-Informatics'
@@ -29,4 +29,4 @@ setup(name='extremevariantfilter',
       scripts=[
          'bin/train_model',
          'bin/apply_filter'],
-      include_package_data=True) # Add License and required Packages
+      include_package_data=True) # TODO: Add a license
