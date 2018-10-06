@@ -29,10 +29,13 @@ Get_Calls_Info(vcf)
 
 Check_Type(poly)
     Ensures input for polymorphism type is an accepted value
-
+    
 Check_VCF(vcf_path)
     Confirms that input VCF has only one calls field and
     a FORMAT field
+
+Is_Gzipped(vcf_path)
+    Checks to see whether a file has a .gz extension
 
 Get_Header(vcf_path)
     Splits header from input vcf and stores it as a list
@@ -78,6 +81,7 @@ Build_Model(poly, njobs)
 
 import pandas as pd
 import numpy as np
+import gzip
 import re
 from xgboost import XGBClassifier
 from sklearn.preprocessing import LabelBinarizer
@@ -161,7 +165,7 @@ def Check_Type(poly):
     poly : str
         A string representing the type of polymorphism. Either 'SNP' or 'INDEL'
     """
-
+    
     if poly != 'SNP' and poly != 'INDEL':
         raise ValueError('--type takes only values SNP or INDEL')
 
@@ -170,30 +174,51 @@ def Check_Type(poly):
 
 def Check_VCF(vcf_path):
     """Confirms that input VCF has only one calls column
-
+    
     Parameters
     ----------
     vcf_path : str
         location of vcf file of interest
     """
-
-    reg = re.compile('^#CHROM')
-    ms_msg = '''Input VCF has multiple samples.
-                ExtremeVariantFilter only supports single sample VCFs.'''
-    no_format_msg = '''Input VCF is missing required FORMAT field'''
-    with open(vcf_path, 'r') as vcf:
+    def assert_vcf(vcf):
+        reg = re.compile('^#CHROM')
+        ms_msg = '''Input VCF has multiple samples. 
+                    ExtremeVariantFilter only supports single sample VCFs.'''
+        no_format_msg = '''Input VCF is missing required FORMAT field'''
         for line in vcf:
             if reg.match(line):
-                assert len(line.split('\t')) == 10, ms_msg
+                assert len(line.split('\t')) == 9, ms_msg
                 assert "FORMAT" in line.split('\t'), no_format_msg
                 break
+    
+    
+    if Is_Gzipped(path):
+        with gzip.open(vcf_path, 'r') as vcf:
+            assert_vcf(vcf)
+    else:
+        with open(vcf_path, 'r') as vcf:
+            assert_vcf(vcf)
+
+
+def Is_Gzipped(path):
+    """Checks whether a file has a gzip extension or not
+    
+    Parameters
+    ----------
+    vcf_path : str
+        location of vcf file of interest
+    """
+    if string.split('/').pop().split('.')[-1:][0] == 'gz':
+        return True
+    else:
+        return False
 
 
 # Apply Filter Functions
 
 
 def Get_Header(vcf_path):
-    """Splits header from input vcf and stores it
+    """Splits header from input vcf and returns it
 
     Parameters
     ----------
@@ -205,8 +230,8 @@ def Get_Header(vcf_path):
     list
         a list representation of the header with added FILTER info
     """
-
-    with open(vcf_path, 'r') as vcf:
+    
+    def read_header(vcf):
         header = []
         newline = vcf.readline()
         while newline.startswith('#'):
@@ -216,6 +241,14 @@ def Get_Header(vcf_path):
                 filter_written = True
             header.append(newline)
             newline = vcf.readline()
+            
+    
+    if Is_Gzipped:
+        with gzip.open(vcf_path) as vcf:
+            header = read_header(vcf)
+    else
+        with open(vcf_path, 'r') as vcf:
+            header = read_header(vcf)
     return header
 
 
@@ -313,9 +346,20 @@ def Get_Name(path):
     """
 
     filename = path.split('/').pop()
-    basename = '.'.join(filename.split('.')[0:-1])
+    if Is_Gzipped(path):
+        basename = '.'.join(filename.split('.')[0:-2])
+    else:
+        basename = '.'.join(filename.split('.')[0:-1])
     outname = basename + '.filter.vcf'
     return outname
+
+
+def Is_Gzipped(path):
+    ""
+    if string.split('/').pop().split('.')[-1:][0] == 'gz':
+        return True
+    else:
+        return False
 
 
 def Write_VCF(table, header, outname):
