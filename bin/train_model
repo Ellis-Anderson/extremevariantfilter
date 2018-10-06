@@ -19,7 +19,7 @@ Options:
     --verbose                       Log output
 
 Examples:
-    python train_table.py --true-pos <path/to/tp/vcf(s)> --false-pos <path/to/fp/vcf(s)> --type [SNP, INDEL] --njobs 20
+    train_model --true-pos <path/to/tp/vcf(s)> --false-pos <path/to/fp/vcf(s)> --type [SNP, INDEL] --njobs 20
 """
 
 from docopt import docopt
@@ -55,12 +55,12 @@ def get_options():
     # Read training data
     tp_vcf = args['--true-pos']
     fp_vcf = args['--false-pos']
-    poly = args['--type']
+    poly = args['--type'].upper()
     njobs = int(args['--njobs'])
     outname = args['--out']
     if outname == "(type).filter.pickle.dat":
         outname = poly + '.filter.pickle.dat'
-    evf.check_type(poly)
+    evf.Check_Type(poly)
 
     return tp_vcf, fp_vcf, poly, njobs, outname
 

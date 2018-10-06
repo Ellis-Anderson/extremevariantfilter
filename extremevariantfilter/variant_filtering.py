@@ -27,8 +27,12 @@ Get_Calls_Info(vcf)
     allele depths, reference allele percentage and alternate
     allele ratio as a DataFrame
 
-check_type(poly)
+Check_Type(poly)
     Ensures input for polymorphism type is an accepted value
+
+Check_VCF(vcf_path)
+    Confirms that input VCF has only one calls field and
+    a FORMAT field
 
 Get_Header(vcf_path)
     Splits header from input vcf and stores it as a list
@@ -74,6 +78,7 @@ Build_Model(poly, njobs)
 
 import pandas as pd
 import numpy as np
+import re
 from xgboost import XGBClassifier
 from sklearn.preprocessing import LabelBinarizer
 
@@ -148,7 +153,7 @@ def Get_Calls_Info(vcf):
     return calls
 
 
-def check_type(poly):
+def Check_Type(poly):
     """Ensures input for polymorphism type is an accepted value
 
     Parameters
@@ -161,6 +166,27 @@ def check_type(poly):
         raise ValueError('--type takes only values SNP or INDEL')
 
     return
+
+
+def Check_VCF(vcf_path):
+    """Confirms that input VCF has only one calls column
+
+    Parameters
+    ----------
+    vcf_path : str
+        location of vcf file of interest
+    """
+
+    reg = re.compile('^#CHROM')
+    ms_msg = '''Input VCF has multiple samples.
+                ExtremeVariantFilter only supports single sample VCFs.'''
+    no_format_msg = '''Input VCF is missing required FORMAT field'''
+    with open(vcf_path, 'r') as vcf:
+        for line in vcf:
+            if reg.match(line):
+                assert len(line.split('\t')) == 10, ms_msg
+                assert "FORMAT" in line.split('\t'), no_format_msg
+                break
 
 
 # Apply Filter Functions
@@ -380,6 +406,8 @@ def Get_Training_Tables(tp_fp_tup):
     """
 
     tp_vcf, fp_vcf = tp_fp_tup
+    Check_VCF(tp_vcf)
+    Check_VCF(fp_vcf)
     tp_snp_vcf = Make_Table(tp_vcf, 1)
     fp_snp_vcf = Make_Table(fp_vcf, 0)
     full_vcf = tp_snp_vcf.append(fp_snp_vcf)
@@ -413,12 +441,14 @@ def Build_Model(poly, njobs):
                  learning_rate=0.3, max_depth=6, random_state=seed,
                  algorithm='gbtree', objective="binary:logistic",
                  nthread=njobs))
-    else:
+    elif poly == "INDEL":
         model = ("XGBoost('gbtree', 0.3, 6, 1000)",
                  XGBClassifier(n_estimators=1000,
                  learning_rate=0.3, max_depth=6, random_state=seed,
                  algorithm='gbtree', objective="binary:logistic",
                  nthread=njobs))
+    else:
+        raise ValueError('--type takes only values SNP or INDEL')
 
     return model
 

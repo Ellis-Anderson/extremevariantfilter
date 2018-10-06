@@ -17,7 +17,7 @@ Options:
     --verbose                       Log output
 
 Examples:
-    python apply_filter.py --vcf <table> --snp-model <snp.pickle.dat> --indel-model <indel.pickle.dat>
+    apply_filter --vcf <table> --snp-model <snp.pickle.dat> --indel-model <indel.pickle.dat>
 """
 
 from docopt import docopt
@@ -46,6 +46,7 @@ def get_options():
 
     # Read training data
     vcf = args['--vcf']
+    evf.Check_VCF(vcf)
     snp_mod = args['--snp-model']
     ind_mod = args['--indel-model']
 
