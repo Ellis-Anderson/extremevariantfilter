@@ -4,8 +4,11 @@
 # Setuptools distribution folder.
 /dist/
 
-# Package testing folder.
-/Test/
-
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
+
+# ipynb files
+*.ipynb
+
+# ipynb checkpoints
+.ipynb_checkpoints
